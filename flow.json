@@ -1,0 +1,44 @@
+{
+	"networks": {
+		"emulator": "127.0.0.1:3569",
+		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"sandboxnet": "access.sandboxnet.nodes.onflow.org:9000",
+		"testnet": "access.devnet.nodes.onflow.org:9000"
+	},
+	"accounts": {
+		"emulator-account": {
+			"address": "f8d6e0586b0a20c7",
+			"key": "9a2f3b4a89b5ab41c013a80de47bc8b0db1ead043ccee38419bd7be8c0140fc0"
+		},
+		"first-user": {
+			"address": "0xe03daebed8ca0615",
+			"key": "01a28e569592e60925ea6c3857c862dbaa5986ad4687354c42308b47760a91da"
+		}
+	},
+	"contracts": {
+		"ErrorCode": "./contracts/ErrorCode.cdc",
+		"StrUtility": "./contracts/StrUtility.cdc",
+		"RaisePool": "./contracts/RaisePool.cdc",
+		"FungibleToken": {
+			"source": "./contracts/standard/FungibleToken.cdc",
+			"aliases": {
+				"emulator": "0xee82856bf20e2aa6",
+				"testnet": "0x9a0766d93b6608b7"
+			}
+		},
+		"FUSD": {
+			"source": "./contracts/standard/FUSD.cdc",
+			"aliases": {
+				"emulator": "0xf8d6e0586b0a20c7",
+				"testnet": "0xe223d8a629e49c68"
+			}
+		}
+
+	},
+	"deployments": {
+		"emulator": {
+			"emulator-account": ["ErrorCode", "StrUtility"]
+		}
+
+	}
+}
