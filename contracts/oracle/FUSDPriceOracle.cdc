@@ -1,7 +1,7 @@
 import OracleInterface from "./OracleInterface.cdc"
 import OracleConfig from "./OracleConfig.cdc"
 
-pub contract FlowPriceOracle: OracleInterface {
+pub contract FUSDPriceOracle: OracleInterface {
 
     pub event MintPriceReader()
     pub event MintPriceFeeder()
@@ -14,7 +14,7 @@ pub contract FlowPriceOracle: OracleInterface {
         /// @Return Median price, returns 0.0 if the current price is invalid
         ///
         pub fun getMedianPrice(): UFix64 {
-            return 1.205
+            return 1.0
         }
     }
 
@@ -36,7 +36,7 @@ pub contract FlowPriceOracle: OracleInterface {
         }
 
         pub fun fetchPrice(certificate: &OracleInterface.OracleCertificate): UFix64 {
-            return 1.1
+            return 0.0
         }
         init() {}
     }
@@ -64,7 +64,7 @@ pub contract FlowPriceOracle: OracleInterface {
 
         /// Recommended path for PriceReader, users can manage resources by themselves
         ///
-        pub fun getPriceReaderStoragePath(): StoragePath { return /storage/emulator_price_reader_flowToken }
+        pub fun getPriceReaderStoragePath(): StoragePath { return /storage/emulator_price_reader_fusd}
 
         /// The oracle contract will get the feeding-price based on this path
         /// Feeders need to expose their price panel capabilities at this public path

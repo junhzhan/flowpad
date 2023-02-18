@@ -4,7 +4,11 @@
         "value": [
             {
                 "type": "String",
-                "value": "A.0x0ae53cb6e3f42a79.FlowToken.Vault"
+                "value": "A.0ae53cb6e3f42a79.FlowToken.Vault"
+            },
+            {
+                "type": "String",
+                "value": "A.f8d6e0586b0a20c7.FUSD.Vault"
             }
         ]
     },
@@ -14,7 +18,25 @@
             {
                 "type": "String",
                 "value": "flowTokenVault"
+            },
+            {
+                "type": "String",
+                "value": "fusdVault"
+            }
+        ]
+    },
+    {
+        "type": "Array",
+        "value": [
+            {
+                "type": "Address",
+                "value": "0x045a1763c93006ca"
+            },
+            {
+                "type": "Address",
+                "value": "0x120e725050340cab"
             }
         ]
     }
 ]
+ 

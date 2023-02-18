@@ -15,10 +15,15 @@
 			"key": "b3a3019ad2f6bb0d654efd604b174603c9c44b34c93761c6520cb6e44b814bbf",
 			"public": "867ed58c072a194871432364471eca2ab6dafa03425b1217610ea455bb1cbacbf477777cd12246c1286b0fd9fe1828433011a49960fe94948574e988aad7b17f"
 		},
-		"flow-price-oracle": {
+		"flowToken-price-oracle": {
 			"address": "0x045a1763c93006ca",
 			"key": "2a67f7ad043a42b8e58399a45cac374d73957c45d461b1b776735d3456959f5f",
 			"public": "43f8e6f76b8e78a73cb2e6966f905fd5b39e2fdd55004437f1a839b5e014ea4d02d2c9da8233b984d709c98106cb2a7d8cd31db5c01e9fe1c0745d3520ac04a0"
+		},
+		"fusd-price-oracle": {
+			"address": "0x120e725050340cab",
+			"key": "759bd9106239ab46dfdf051472f939cd63937dab6f2d66e49b4195128df657da",
+			"public": "cd29d47df8f64685eef7442aa928476f01f93acd82783a4598c1517286f1769f5184b7123edd8d41ac49a25f64f964525e6b64efd3f9846a46712b50399777d0"
 		}
 	},
 	"contracts": {
@@ -51,7 +56,8 @@
 				"testnet": "0x2a9b59c3e2b72ee0"
 			}
 		},
-		"FlowPriceOracle": "./contracts/oracle/FlowPriceOracle.cdc"
+		"FlowPriceOracle": "./contracts/oracle/FlowPriceOracle.cdc",
+		"FUSDPriceOracle": "./contracts/oracle/FUSDPriceOracle.cdc"
 	},
 	"deployments": {
 		"emulator": {
@@ -60,26 +66,13 @@
 				"StrUtility",
 				"OracleConfig",
 				"OracleInterface",
-				{
-					"name": "RaisePool",
-					"args": [
-						{
-							"type": "String",
-							"value": "A.0ae53cb6e3f42a79.FlowToken.Vault&A.f8d6e0586b0a20c7.FUSD.Vault"
-						},
-						{
-							"type": "String",
-							"value": "flowTokenVault&fusdVault"
-						},
-						{
-							"type": "String",
-							"value": ""
-						}
-					]
-				}
+				"RaisePool"
 			],
-			"flow-price-oracle": [
+			"flowToken-price-oracle": [
 				"FlowPriceOracle"
+			],
+			"fusd-price-oracle": [
+				"FUSDPriceOracle"
 			]
 		}
 	}
