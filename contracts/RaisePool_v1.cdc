@@ -1,46 +1,25 @@
 import ErrorCode from "./ErrorCode.cdc"
 import FungibleToken from "./standard/FungibleToken.cdc"
 import StrUtility from "./StrUtility.cdc"
-import OracleInterface from "./oracle/OracleInterface.cdc"
-import OracleConfig from "./oracle/OracleConfig.cdc"
 
 pub contract RaisePool {
 
     access(self) let typeArray: [Type]
     access(self) var vaultTypeInfos: [TokenVaultInfo]
 
-    pub let AdminStorage: StoragePath
+    pub let userTokenBalance: {Address: {Type: UserTokenBalance}}
 
-    pub let userTokenBalance: {Address: {Type: TokenBalance}}
-
-    pub struct TokenBalance {
+    pub struct UserTokenBalance {
         pub let vaultType: Type
-        pub let balance: UFix64
-        pub let oracleAccount: Address
-        pub let account: Address
+        pub(set) var balance: UFix64
+        pub(set) var balanceInUSDC: UFix64
 
-        init(balance: UFix64, vaultType: Type, oracleAccount: Address, account: Address) {
+        init(vaultType: Type) {
             self.vaultType = vaultType
             self.balance = 0.0
-            self.oracleAccount = oracleAccount
-            self.account = account
+            self.balanceInUSDC = 0.0
         }
     }
-
-    pub fun getUserTokenBalance(userAccount: Address): [{String: AnyStruct}] {
-        assert(self.userTokenBalance.containsKey(userAccount), message: ErrorCode.encode(code: ErrorCode.Code.COMMIT_ADDRESS_NOT_EXIST))
-        let userTokenBalance = self.userTokenBalance[userAccount]!
-        let tokenList: [{String: AnyStruct}]= []
-        for tokenType in userTokenBalance.keys {
-            let tokenBalance = userTokenBalance[tokenType]! 
-            let tokenKey = tokenBalance.vaultType.identifier
-            let balance = tokenBalance.balance
-            
-            tokenList
-        }
-        return []
-
-    } 
 
     pub struct TokenVaultInfo {
         pub let typeStr: String
@@ -73,15 +52,13 @@ pub contract RaisePool {
     **/
     pub fun commit(commiterAddress: Address, token: @FungibleToken.Vault): @FungibleToken.Vault? {
         var poolVaultRef: &FungibleToken.Vault? = nil
-        var oracleAccount: Address? = nil
         for element in self.vaultTypeInfos {
             if token.isInstance(element.getVaultType()) {
                 poolVaultRef = self.account.borrow<&FungibleToken.Vault>(from: element.getStoragePath())!
-                oracleAccount = element.getOracleAccount()
             }
         }
         if poolVaultRef != nil {
-            self.depositToken(address: commiterAddress, token: <- token, tokenPool: poolVaultRef!, oracleAccount: oracleAccount!)
+            self.depositToken(address: commiterAddress, token: <- token, tokenPool: poolVaultRef!)
             return nil
         } else {
             return <- token
@@ -101,33 +78,36 @@ pub contract RaisePool {
         }
     }
 
-    access(self) fun depositToken(address: Address, token: @FungibleToken.Vault, tokenPool: &FungibleToken.Vault, oracleAccount: Address) {
+    access(self) fun depositToken(address: Address, token: @FungibleToken.Vault, tokenPool: &FungibleToken.Vault) {
         let type = token.getType()
-        let addedBalance = token.balance
+        let balance = token.balance
         tokenPool.deposit(from: <- token)
-        let userTokenMap: {Type: TokenBalance} = self.userTokenBalance[address] ?? {}
-        if let userTokenBalance = userTokenMap[type] {
-            userTokenMap[type] = TokenBalance(balance: userTokenBalance.balance + addedBalance, vaultType: type, oracleAccount: oracleAccount, account: address)
-        } else {
-            userTokenMap[type] = TokenBalance(balance: addedBalance, vaultType: type, oracleAccount: oracleAccount, account: address)
-        }
+        let userTokenMap: {Type: UserTokenBalance} = self.userTokenBalance[address] ?? {}
+        let userTokenBalance: UserTokenBalance = userTokenMap[type] ?? UserTokenBalance(vaultType: type)
+        userTokenBalance.balance = userTokenBalance.balance + balance
+        userTokenBalance.balanceInUSDC = userTokenBalance.balanceInUSDC + balance
+        userTokenMap[type] = userTokenBalance
         self.userTokenBalance[address] = userTokenMap
     }
 
-    access(self) fun readTokenPrice(oracleAccount: Address): UFix64 {
-        let priceReaderSuggestedPath = getAccount(oracleAccount).getCapability<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath).borrow()!.getPriceReaderStoragePath()
-        let priceReaderRef  = self.account.borrow<&OracleInterface.PriceReader>(from: priceReaderSuggestedPath)
-                      ?? panic("Lost local price reader")
-        let price = priceReaderRef.getMedianPrice()
-        return price
-    }
-
-    init() {
-        self.AdminStorage = /storage/flowpadAdmin
+    init(typeStr: String, pathStr: String, oracleAccount: String) {
+        log(typeStr)
+        log(pathStr)
+        let typeStrArray = StrUtility.splitStr(str: typeStr, delimiter: "&")
+        log(typeStrArray)
+        let pathStrArray = StrUtility.splitStr(str: pathStr, delimiter: "&")
+        log(pathStrArray)
         self.typeArray = []
         self.vaultTypeInfos = []
         self.userTokenBalance = {}
-        self.account.save(<- create PoolAdmin(), to: self.AdminStorage)
+        assert(typeStrArray.length == pathStrArray.length, message: "typeStr array length is not equal to storagePath array")
+        for index, typeStrItem in typeStrArray {
+            let vaultStoragePath: StoragePath = StoragePath(identifier: pathStrArray[index])!
+            log(vaultStoragePath)
+            log(self.account.borrow<&FungibleToken.Vault>(from: vaultStoragePath)!.getType().identifier)
+            assert(self.account.borrow<&FungibleToken.Vault>(from: vaultStoragePath)!.getType().identifier == typeStrItem, message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
+            self.vaultTypeInfos.append(TokenVaultInfo(typeStr: typeStrItem, storagePath: pathStrArray[index]))
+        }
 
     }
 }

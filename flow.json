@@ -10,9 +10,15 @@
 			"address": "f8d6e0586b0a20c7",
 			"key": "9a2f3b4a89b5ab41c013a80de47bc8b0db1ead043ccee38419bd7be8c0140fc0"
 		},
-		"first-user": {
+		"deploy-account": {
 			"address": "0xe03daebed8ca0615",
-			"key": "01a28e569592e60925ea6c3857c862dbaa5986ad4687354c42308b47760a91da"
+			"key": "b3a3019ad2f6bb0d654efd604b174603c9c44b34c93761c6520cb6e44b814bbf",
+			"public": "867ed58c072a194871432364471eca2ab6dafa03425b1217610ea455bb1cbacbf477777cd12246c1286b0fd9fe1828433011a49960fe94948574e988aad7b17f"
+		},
+		"flow-price-oracle": {
+			"address": "0x045a1763c93006ca",
+			"key": "2a67f7ad043a42b8e58399a45cac374d73957c45d461b1b776735d3456959f5f",
+			"public": "43f8e6f76b8e78a73cb2e6966f905fd5b39e2fdd55004437f1a839b5e014ea4d02d2c9da8233b984d709c98106cb2a7d8cd31db5c01e9fe1c0745d3520ac04a0"
 		}
 	},
 	"contracts": {
@@ -32,13 +38,50 @@
 				"emulator": "0xf8d6e0586b0a20c7",
 				"testnet": "0xe223d8a629e49c68"
 			}
-		}
-
+		},
+		"OracleInterface": {
+			"source": "./contracts/oracle/OracleInterface.cdc",
+			"aliases": {
+				"testnet": "0x2a9b59c3e2b72ee0"
+			}
+		},
+		"OracleConfig": {
+			"source": "./contracts/oracle/OracleConfig.cdc",
+			"aliases": {
+				"testnet": "0x2a9b59c3e2b72ee0"
+			}
+		},
+		"FlowPriceOracle": "./contracts/oracle/FlowPriceOracle.cdc"
 	},
 	"deployments": {
 		"emulator": {
-			"emulator-account": ["ErrorCode", "StrUtility"]
+			"deploy-account": [
+				"ErrorCode",
+				"StrUtility",
+				"OracleConfig",
+				"OracleInterface",
+				{
+					"name": "RaisePool",
+					"args": [
+						{
+							"type": "String",
+							"value": "A.0ae53cb6e3f42a79.FlowToken.Vault&A.f8d6e0586b0a20c7.FUSD.Vault"
+						},
+						{
+							"type": "String",
+							"value": "flowTokenVault&fusdVault"
+						},
+						{
+							"type": "String",
+							"value": ""
+						}
+					]
+				}
+			],
+			"flow-price-oracle": [
+				"FlowPriceOracle"
+			]
 		}
-
 	}
 }
+ 
