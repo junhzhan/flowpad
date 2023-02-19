@@ -24,6 +24,11 @@
 			"address": "0x120e725050340cab",
 			"key": "759bd9106239ab46dfdf051472f939cd63937dab6f2d66e49b4195128df657da",
 			"public": "cd29d47df8f64685eef7442aa928476f01f93acd82783a4598c1517286f1769f5184b7123edd8d41ac49a25f64f964525e6b64efd3f9846a46712b50399777d0"
+		},
+		"cvsd-deploy-account": {
+			"address": "0xf4a4c2b1fdfcb72f",
+			"key": "5131a1b09f5cae6b64a824c8f6e76a4eba2526c8f1bb739475b325fd769bc572",
+			"public": "e576970b7868390eeeda3fbc3d5929741e9bbcbfd08a4652f34c27e7fde8f04019fe68c70574a609bc0745c5c4f0486cf855a34f1b6ac7c19587594f7d2e502c"
 		}
 	},
 	"contracts": {
@@ -57,7 +62,8 @@
 			}
 		},
 		"FlowPriceOracle": "./contracts/oracle/FlowPriceOracle.cdc",
-		"FUSDPriceOracle": "./contracts/oracle/FUSDPriceOracle.cdc"
+		"FUSDPriceOracle": "./contracts/oracle/FUSDPriceOracle.cdc",
+		"CVSDToken": "./contracts/CVSD/CVSDToken.cdc"
 	},
 	"deployments": {
 		"emulator": {
@@ -74,6 +80,9 @@
 			"fusd-price-oracle": [
 				"FUSDPriceOracle"
 			]
+		},
+		"testnet": {
+			"cvsd-deploy-account": ["CVSDToken"]
 		}
 	}
 }
