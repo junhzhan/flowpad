@@ -24,6 +24,12 @@ pub contract RaisePool {
 
     pub var projectTokenName: String
 
+    pub enum Status: UInt8 {
+        pub case COMING_SOON
+        pub case ONGOING
+        pub case END
+    }
+
     pub let poolTokenBalance: {Type: TokenBalance}
 
     pub struct TokenBalance {
@@ -38,7 +44,17 @@ pub contract RaisePool {
             self.oracleAccount = oracleAccount
             self.account = account
         }
+
+        pub fun getTokenPrice(): UFix64 {
+            let priceReaderSuggestedPath = getAccount(self.oracleAccount).getCapability<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath).borrow()!.getPriceReaderStoragePath()
+            /// local PriceReader reference
+            let priceReaderRef  = RaisePool.account.borrow<&OracleInterface.PriceReader>(from: priceReaderSuggestedPath)
+                      ?? panic("Lost local price reader")
+            let price = priceReaderRef.getMedianPrice()
+            return price
+        }
     }
+
 
     pub fun getUserCommitDetail(userAccount: Address): [{String: AnyStruct}] {
         assert(self.userTokenBalance.containsKey(userAccount), message: ErrorCode.encode(code: ErrorCode.Code.COMMIT_ADDRESS_NOT_EXIST))

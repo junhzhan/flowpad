@@ -25,13 +25,30 @@
 			"key": "759bd9106239ab46dfdf051472f939cd63937dab6f2d66e49b4195128df657da",
 			"public": "cd29d47df8f64685eef7442aa928476f01f93acd82783a4598c1517286f1769f5184b7123edd8d41ac49a25f64f964525e6b64efd3f9846a46712b50399777d0"
 		},
-		"cvsd-deploy-account-testnet": {
+		"testnet-cvsd-deploy-account": {
 			"address": "0xf4a4c2b1fdfcb72f",
 			"key": "5131a1b09f5cae6b64a824c8f6e76a4eba2526c8f1bb739475b325fd769bc572",
 			"public": "e576970b7868390eeeda3fbc3d5929741e9bbcbfd08a4652f34c27e7fde8f04019fe68c70574a609bc0745c5c4f0486cf855a34f1b6ac7c19587594f7d2e502c"
 		},
-		"deploy-account-testnet": {
-			"address": ""
+		"testnet-deploy-account": {
+			"address": "0xbaa63508985604ab",
+			"key": "0450e1543e15ef9e75a64674e6392bf2a3496137672e3885614f7452bdd9ddf1",
+			"public": "c175615aa41cdf76973f7dd42bb5b004e70aa08da7f4bb34f429793c263f677ab5567bc2fd0045ed331f5cd6c496e96b413679ca56ae8f57ee5eac562dfcd759"
+		},
+		"testnet-common-contracts-account": {
+			"address": "0x842714e27cd18f8e",
+			"key": "2572247b8d33ef59ffddb0cc197b6a9103299c42b4a9d96af5c5c744eeeddfcb",
+			"public": "d7630e1daf3b7b60f2118e446ace890363bee21f8d71b70508922133b386ff5e9bba9ee651f49017357f1e70b78742db75b1b3e5b008cb57b125a1bb2be0f730"
+		},
+		"testnet-commit-account": {
+			"address": "0x1768d28ba059980c",
+			"key": {
+				"type": "hex",
+				"index": 0,
+        		"signatureAlgorithm": "ECDSA_secp256k1",
+        		"hashAlgorithm": "SHA2_256",
+        		"privateKey": "a846e978b3100eb22de6d86d9b7fb7d454044e8bb83d609999516e1a48d3985c"
+			}
 		}
 	},
 	"contracts": {
@@ -85,7 +102,12 @@
 			]
 		},
 		"testnet": {
-			"cvsd-deploy-account-testnet": ["CVSDToken"]
+			"testnet-cvsd-deploy-account": ["CVSDToken"],
+			"testnet-common-contracts-account": [
+				"ErrorCode",
+				"StrUtility"
+			],
+			"testnet-deploy-account": ["RaisePool"]
 		}
 	}
 }

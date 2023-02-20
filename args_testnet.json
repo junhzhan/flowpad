@@ -4,11 +4,11 @@
         "value": [
             {
                 "type": "String",
-                "value": "A.0ae53cb6e3f42a79.FlowToken.Vault"
+                "value": "A.7e60df042a9c0868.FlowToken.Vault"
             },
             {
                 "type": "String",
-                "value": "A.f8d6e0586b0a20c7.FUSD.Vault"
+                "value": "A.a983fecbed621163.FiatToken.Vault"
             }
         ]
     },
@@ -21,7 +21,7 @@
             },
             {
                 "type": "String",
-                "value": "flowpad_fusdVault"
+                "value": "flowpad_usdcVault"
             }
         ]
     },
@@ -30,11 +30,11 @@
         "value": [
             {
                 "type": "Address",
-                "value": "0x045a1763c93006ca"
+                "value": "0xcbdb5a7b89c3c844"
             },
             {
                 "type": "Address",
-                "value": "0x120e725050340cab"
+                "value": "0xc911d6ddfae70ce8"
             }
         ]
     }
