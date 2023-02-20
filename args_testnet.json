@@ -4,11 +4,11 @@
         "value": [
             {
                 "type": "String",
-                "value": "A.7e60df042a9c0868.FlowToken.Vault"
+                "value": "A.7e60df042a9c0868.FlowToken"
             },
             {
                 "type": "String",
-                "value": "A.a983fecbed621163.FiatToken.Vault"
+                "value": "A.a983fecbed621163.FiatToken"
             }
         ]
     },

@@ -1,10 +1,10 @@
 import FungibleToken from "../contracts/standard/FungibleToken.cdc"
 import StrUtility from "../contracts/StrUtility.cdc"
 
-transaction(typeStrList: [String], storagePathList: [String], oracleAccountList: [Address]) {
+transaction(tokenKeyList: [String], storagePathList: [String], oracleAccountList: [Address]) {
     prepare(signer: AuthAccount) {
-        for index, typeStr in typeStrList {
-            let subStr = StrUtility.splitStr(str: typeStr, delimiter: ".")
+        for index, tokenKey in tokenKeyList {
+            let subStr = StrUtility.splitStr(str: tokenKey, delimiter: ".")
             let tokenAccount = subStr[1]
             let tokenName = subStr[2]
             let vaultStoragePath = StoragePath(identifier: storagePathList[index])!

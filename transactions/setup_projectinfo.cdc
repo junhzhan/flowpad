@@ -1,10 +1,10 @@
 import RaisePool from "../contracts/RaisePool.cdc"
 
-transaction(typeStrList: [String], pathStrList: [String], oracleAccountList: [Address]) {
+transaction(tokenKeyList: [String], pathStrList: [String], oracleAccountList: [Address]) {
     prepare(signer: AuthAccount) {
         let admin = signer.borrow<&RaisePool.PoolAdmin>(from: RaisePool.AdminStorage)!
-        admin.setProjectInfo(tokenName: "CVSD", tokenAmount: 200_0000.0, tokenPrice: 0.005)
-        admin.setStartTimestamp(startTimestamp: 1676881278.0)
-        admin.setEndTimestamp(endTimestamp: 1676884878.0)
+        admin.setProjectInfo(projectName: "Cat VS Dog", tokenKey: "A.f4a4c2b1fdfcb72f.CVSDToken", tokenAmount: 200_0000.0, tokenPrice: 0.005)
+        admin.setStartTimestamp(startTimestamp: 1676901600.0)
+        admin.setEndTimestamp(endTimestamp: 1676908800.0)
     }
 }

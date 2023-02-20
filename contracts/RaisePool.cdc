@@ -7,7 +7,7 @@ import OracleConfig from "./oracle/OracleConfig.cdc"
 pub contract RaisePool {
 
     access(self) let typeArray: [Type]
-    access(self) var vaultTypeInfos: [TokenVaultInfo]
+    access(self) var tokenInfos: [TokenInfo]
 
     pub let AdminStorage: StoragePath
 
@@ -22,7 +22,9 @@ pub contract RaisePool {
 
     pub var totalProjectToken: UFix64
 
-    pub var projectTokenName: String
+    pub var projectName: String
+
+    pub var projectTokenKey: String
 
     pub enum Status: UInt8 {
         pub case COMING_SOON
@@ -33,13 +35,13 @@ pub contract RaisePool {
     pub let poolTokenBalance: {Type: TokenBalance}
 
     pub struct TokenBalance {
-        pub let vaultType: Type
+        pub let tokenKey: String
         pub let balance: UFix64
         pub let oracleAccount: Address
         pub let account: Address
 
-        init(balance: UFix64, vaultType: Type, oracleAccount: Address, account: Address) {
-            self.vaultType = vaultType
+        init(tokenKey: String, balance: UFix64, oracleAccount: Address, account: Address) {
+            self.tokenKey = tokenKey
             self.balance = balance
             self.oracleAccount = oracleAccount
             self.account = account
@@ -62,7 +64,7 @@ pub contract RaisePool {
         let tokenList: [{String: AnyStruct}]= []
         for tokenType in userTokenBalance.keys {
             let tokenBalance = userTokenBalance[tokenType]! 
-            let tokenKey = tokenBalance.vaultType.identifier
+            let tokenKey = tokenBalance.tokenKey
             let balance = tokenBalance.balance
             let oracleAccount = tokenBalance.oracleAccount
             /// Recommended storage path for PriceReader resource
@@ -77,13 +79,15 @@ pub contract RaisePool {
 
     } 
 
-    pub struct TokenVaultInfo {
+    pub struct TokenInfo {
+        pub let tokenKey: String
         pub let typeStr: String
         pub let storagePathStr: String
         pub let oracleAccount: Address
 
-        init(typeStr: String, storagePath: String, oracleAccount: Address) {
-            self.typeStr = typeStr
+        init(tokenKey: String, storagePath: String, oracleAccount: Address) {
+            self.tokenKey = tokenKey
+            self.typeStr = tokenKey.concat(".Vault")
             self.storagePathStr = storagePath
             self.oracleAccount = oracleAccount
         }
@@ -100,7 +104,6 @@ pub contract RaisePool {
             return self.oracleAccount
         }
 
-    
     }
 
     /** 
@@ -108,15 +111,15 @@ pub contract RaisePool {
     **/
     pub fun commit(commiterAddress: Address, token: @FungibleToken.Vault) {
         var poolVaultRef: &FungibleToken.Vault? = nil
-        var oracleAccount: Address? = nil
-        for element in self.vaultTypeInfos {
+        var tokenInfo: TokenInfo? = nil
+        for element in self.tokenInfos {
             if token.isInstance(element.getVaultType()) {
                 poolVaultRef = self.account.borrow<&FungibleToken.Vault>(from: element.getStoragePath())!
-                oracleAccount = element.getOracleAccount()
+                tokenInfo = element
             }
         }
         if poolVaultRef != nil {
-            self.depositToken(address: commiterAddress, token: <- token, tokenPool: poolVaultRef!, oracleAccount: oracleAccount!)
+            self.depositToken(address: commiterAddress, token: <- token, tokenPool: poolVaultRef!, tokenKey: tokenInfo!.tokenKey, oracleAccount: tokenInfo!.oracleAccount)
         } else {
             panic(ErrorCode.encode(code: ErrorCode.Code.COMMITTED_TOKEN_NOT_SUPPORTED))
         }
@@ -124,14 +127,15 @@ pub contract RaisePool {
 
     pub resource PoolAdmin {
         /// set vault related fields for tokens to be committed
-        pub fun setTokenVaultInfo(typeStrList: [String], pathStrList:[String], oracleAccountList: [Address]) {
-            RaisePool.vaultTypeInfos = []
-            for index, typeStrItem in typeStrList {
+        pub fun setTokenVaultInfo(tokenKeyList: [String], pathStrList:[String], oracleAccountList: [Address]) {
+            RaisePool.tokenInfos = []
+            for index, tokenKey in tokenKeyList {
                 let vaultStoragePath: StoragePath = StoragePath(identifier: pathStrList[index])!
                 log(vaultStoragePath)
                 log(RaisePool.account.borrow<&FungibleToken.Vault>(from: vaultStoragePath)!.getType().identifier)
-                assert(RaisePool.account.borrow<&FungibleToken.Vault>(from: vaultStoragePath)!.getType().identifier == typeStrItem, message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
-                RaisePool.vaultTypeInfos.append(TokenVaultInfo(typeStr: typeStrItem, storagePath: pathStrList[index], oracleAccount: oracleAccountList[index]))
+                let tokenVaultInfo = TokenInfo(tokenKey: tokenKey, storagePath: pathStrList[index], oracleAccount: oracleAccountList[index])
+                assert(RaisePool.account.borrow<&FungibleToken.Vault>(from: vaultStoragePath)!.getType().identifier == tokenVaultInfo.typeStr, message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
+                RaisePool.tokenInfos.append(tokenVaultInfo)
             }
         }
 
@@ -143,8 +147,9 @@ pub contract RaisePool {
             RaisePool.endTimestamp = endTimestamp
         }
 
-        pub fun setProjectInfo(tokenName: String, tokenAmount: UFix64, tokenPrice: UFix64) {
-            RaisePool.projectTokenName = tokenName
+        pub fun setProjectInfo(projectName: String, tokenKey: String, tokenAmount: UFix64, tokenPrice: UFix64) {
+            RaisePool.projectName = projectName
+            RaisePool.projectTokenKey = tokenKey
             RaisePool.totalProjectToken = tokenAmount
             RaisePool.projectTokenPrice = tokenPrice
         }
@@ -152,24 +157,24 @@ pub contract RaisePool {
 
     }
 
-    access(self) fun depositToken(address: Address, token: @FungibleToken.Vault, tokenPool: &FungibleToken.Vault, oracleAccount: Address) {
+    access(self) fun depositToken(address: Address, token: @FungibleToken.Vault, tokenPool: &FungibleToken.Vault, tokenKey: String, oracleAccount: Address) {
         let type = token.getType()
         let addedBalance = token.balance
         tokenPool.deposit(from: <- token)
         let userTokenMap: {Type: TokenBalance} = self.userTokenBalance[address] ?? {}
         if let userTokenBalance = userTokenMap[type] {
-            userTokenMap[type] = TokenBalance(balance: userTokenBalance.balance + addedBalance, vaultType: type, oracleAccount: oracleAccount, account: address)
+            userTokenMap[type] = TokenBalance(tokenKey: tokenKey, balance: userTokenBalance.balance + addedBalance, oracleAccount: oracleAccount, account: address)
         } else {
-            userTokenMap[type] = TokenBalance(balance: addedBalance, vaultType: type, oracleAccount: oracleAccount, account: address)
+            userTokenMap[type] = TokenBalance(tokenKey: tokenKey, balance: addedBalance, oracleAccount: oracleAccount, account: address)
         }
         self.userTokenBalance[address] = userTokenMap
 
         ///adjust token balance of the whole pool
         if let poolTokenBalance = self.poolTokenBalance[type] {
-            let updatePoolTokenBalance = TokenBalance(balance: poolTokenBalance.balance + addedBalance, vaultType: type, oracleAccount: oracleAccount, account: 0x0)
+            let updatePoolTokenBalance = TokenBalance(tokenKey: tokenKey, balance: poolTokenBalance.balance + addedBalance, oracleAccount: oracleAccount, account: 0x0)
             self.poolTokenBalance[type] = updatePoolTokenBalance
         } else {
-            let updatePoolTokenBalance = TokenBalance(balance: addedBalance, vaultType: type, oracleAccount: oracleAccount, account: 0x0)
+            let updatePoolTokenBalance = TokenBalance(tokenKey: tokenKey, balance: addedBalance, oracleAccount: oracleAccount, account: 0x0)
             self.poolTokenBalance[type] = updatePoolTokenBalance
         }
     }
@@ -185,12 +190,13 @@ pub contract RaisePool {
     init() {
         self.AdminStorage = /storage/flowpadAdmin
         self.typeArray = []
-        self.vaultTypeInfos = []
+        self.tokenInfos = []
         self.userTokenBalance = {}
         self.startTimestamp = UFix64.max
         self.endTimestamp = UFix64.max
         self.poolTokenBalance = {}
-        self.projectTokenName = ""
+        self.projectName = ""
+        self.projectTokenKey = ""
         self.totalProjectToken = 0.0
         self.projectTokenPrice = 0.0
         

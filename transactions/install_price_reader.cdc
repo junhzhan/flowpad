@@ -2,7 +2,7 @@
 import OracleInterface from "../contracts/oracle/OracleInterface.cdc"
 import OracleConfig from "../contracts/oracle/OracleConfig.cdc"
 
-transaction(typeStrList: [String], storagePathList: [String], oracleAccountList: [Address]) {
+transaction(tokenKeyList: [String], storagePathList: [String], oracleAccountList: [Address]) {
     prepare(account: AuthAccount) {
         /// Flow/USD address is 0xcbdb5a7b89c3c844
         /// Oracle contract's interface

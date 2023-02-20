@@ -1,9 +1,9 @@
-
-
 import RaisePool from "../contracts/RaisePool.cdc"
+
 pub fun main(): {String: AnyStruct} {
     let projectInfo: {String: AnyStruct} = {}
-    projectInfo["projectName"] = RaisePool.projectTokenName
+    projectInfo["projectName"] = RaisePool.projectName
+    projectInfo["tokenKey"] = RaisePool.projectTokenKey
     projectInfo["startTimestamp"] = RaisePool.startTimestamp
     projectInfo["endTimestamp"] = RaisePool.endTimestamp
     let blockTimestamp = getCurrentBlock().timestamp
@@ -22,7 +22,7 @@ pub fun main(): {String: AnyStruct} {
     for tokenType in poolTokenBalance.keys {
         let tokenBalance = poolTokenBalance[tokenType]!
         totalRaise.append({
-            "tokenKey": tokenBalance.vaultType.identifier,
+            "tokenKey": tokenBalance.tokenKey,
             "amount": tokenBalance.balance,
             "price": tokenBalance.getTokenPrice()
         })
