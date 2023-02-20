@@ -27,6 +27,7 @@ pub fun main(): {String: AnyStruct} {
             "price": tokenBalance.getTokenPrice()
         })
     }
+    projectInfo["totalRaise"] = totalRaise
     return projectInfo
 
 }
