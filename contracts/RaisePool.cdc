@@ -17,7 +17,8 @@ pub contract RaisePool {
 
     pub var endTimestamp: UFix64
 
-    pub var totalProjectTokenValueInUSD: UFix64
+    pub var projectTokenPrice: UFix64
+
 
     pub var totalProjectToken: UFix64
 
@@ -118,12 +119,18 @@ pub contract RaisePool {
             }
         }
 
-        pub fun setProjectInfo(tokenName: String, tokenAmount: UFix64, tokenValueInUSD: UFix64, startTimestamp: UFix64, endTimestamp: UFix64) {
+        pub fun setStartTimestamp(startTimestamp: UFix64) {
+            RaisePool.startTimestamp = startTimestamp
+        }
+
+        pub fun setEndTimestamp(endTimestamp: UFix64) {
+            RaisePool.endTimestamp = endTimestamp
+        }
+
+        pub fun setProjectInfo(tokenName: String, tokenAmount: UFix64, tokenPrice: UFix64) {
             RaisePool.projectTokenName = tokenName
             RaisePool.totalProjectToken = tokenAmount
-            RaisePool.totalProjectTokenValueInUSD = tokenValueInUSD
-            RaisePool.startTimestamp = startTimestamp
-            RaisePool.endTimestamp = endTimestamp
+            RaisePool.projectTokenPrice = tokenPrice
         }
 
 
@@ -169,7 +176,7 @@ pub contract RaisePool {
         self.poolTokenBalance = {}
         self.projectTokenName = ""
         self.totalProjectToken = 0.0
-        self.totalProjectTokenValueInUSD = 0.0
+        self.projectTokenPrice = 0.0
         
         self.account.save(<- create PoolAdmin(), to: self.AdminStorage)
 

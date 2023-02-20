@@ -19,5 +19,14 @@ pub contract StrUtility {
         }
         return splitResult
     }
+
+    pub fun toAddress(from: String): Address {
+        var r:UInt64 = UInt64(0)
+        var bytes = from.decodeHex()
+        while bytes.length>0{
+            r = r  + (UInt64(bytes.removeFirst()) << UInt64(bytes.length * 8))
+        }
+        return Address(r)
+    }
     init() {}
 }
