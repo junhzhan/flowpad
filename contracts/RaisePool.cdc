@@ -58,6 +58,7 @@ pub contract RaisePool {
     }
 
 
+
     pub fun getUserCommitDetail(userAccount: Address): [{String: AnyStruct}] {
         assert(self.userTokenBalance.containsKey(userAccount), message: ErrorCode.encode(code: ErrorCode.Code.COMMIT_ADDRESS_NOT_EXIST))
         let userTokenBalance = self.userTokenBalance[userAccount]!
@@ -79,17 +80,56 @@ pub contract RaisePool {
 
     } 
 
+    pub fun getTokenPurchased(userAccount: Address): UFix64 {
+        let userTokenBalance = self.userTokenBalance[userAccount]!
+        var userCommitValue: UFix64 = self.caculateValue(tokenBalance: userTokenBalance)
+        var totalCommitValue: UFix64 = self.caculateValue(tokenBalance: self.poolTokenBalance)
+        var tokenPurchased: UFix64 = 0.0
+        if totalCommitValue > (self.totalProjectToken * self.projectTokenPrice) {
+            tokenPurchased = userCommitValue / totalCommitValue * self.totalProjectToken
+        } else {
+            tokenPurchased = userCommitValue / self.projectTokenPrice
+        }
+        return tokenPurchased
+    }
+
+    access(self) fun caculateValue(tokenBalance: {Type: TokenBalance}): UFix64 {
+        var totalValue = 0.0
+        let tokenPrice: {String: UFix64} = {}
+        for tokenInfo in self.tokenInfos {
+            if tokenInfo.price > 0.0 {
+                tokenPrice[tokenInfo.tokenKey] = tokenInfo.price
+            } else {
+                let priceReaderSuggestedPath = getAccount(tokenInfo.oracleAccount).getCapability<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath).borrow()!.getPriceReaderStoragePath()
+                /// local PriceReader reference
+                let priceReaderRef  = RaisePool.account.borrow<&OracleInterface.PriceReader>(from: priceReaderSuggestedPath)
+                      ?? panic("Lost local price reader")
+                let price = priceReaderRef.getMedianPrice()
+                tokenPrice[tokenInfo.tokenKey] = tokenInfo.price
+            }
+        }
+        for tokenType in tokenBalance.keys {
+            let tokenBalance = tokenBalance[tokenType]!
+            let tokenValue = tokenPrice[tokenBalance.tokenKey]! * tokenBalance.balance
+            totalValue = totalValue + tokenValue
+
+        }
+        return totalValue
+    }
+
     pub struct TokenInfo {
         pub let tokenKey: String
-        pub let typeStr: String
-        pub let storagePathStr: String
+        access(self) let typeStr: String
+        access(self) let storagePathStr: String
         pub let oracleAccount: Address
+        pub let price: UFix64
 
         init(tokenKey: String, storagePath: String, oracleAccount: Address) {
             self.tokenKey = tokenKey
             self.typeStr = tokenKey.concat(".Vault")
             self.storagePathStr = storagePath
             self.oracleAccount = oracleAccount
+            self.price = 0.0
         }
 
         pub fun getVaultType(): Type {
@@ -100,11 +140,8 @@ pub contract RaisePool {
             return StoragePath(identifier: self.storagePathStr)!
         }
 
-        pub fun getOracleAccount(): Address {
-            return self.oracleAccount
-        }
-
     }
+
 
     /** 
     user commits one of the supported tokens
