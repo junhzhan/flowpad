@@ -63,6 +63,7 @@ pub contract RaisePool {
         assert(self.userTokenBalance.containsKey(userAccount), message: ErrorCode.encode(code: ErrorCode.Code.COMMIT_ADDRESS_NOT_EXIST))
         let userTokenBalance = self.userTokenBalance[userAccount]!
         let tokenList: [{String: AnyStruct}]= []
+        
         for tokenType in userTokenBalance.keys {
             let tokenBalance = userTokenBalance[tokenType]! 
             let tokenKey = tokenBalance.tokenKey
@@ -78,7 +79,14 @@ pub contract RaisePool {
         }
         return tokenList
 
-    } 
+    }
+
+    pub fun getTokenSpent(userAccount: Address): {String: UFix64} {
+        let userTokenBalance = self.userTokenBalance[userAccount]!
+        var userCommmitValue = self.caculateValue(tokenBalance: userTokenBalance)
+        return {}
+
+    }
 
     pub fun getTokenPurchased(userAccount: Address): UFix64 {
         let userTokenBalance = self.userTokenBalance[userAccount]!
