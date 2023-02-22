@@ -19,12 +19,13 @@ pub fun main(): {String: AnyStruct} {
     let poolTokenBalance = RaisePool.poolTokenBalance
     
     let totalRaise: [{String: AnyStruct}] = []
-    for tokenType in poolTokenBalance.keys {
-        let tokenBalance = poolTokenBalance[tokenType]!
+    for tokenKey in poolTokenBalance.keys {
+        let tokenBalance = poolTokenBalance[tokenKey]!
+        let tokenInfo = RaisePool.tokenInfos[tokenKey]!
         totalRaise.append({
             "tokenKey": tokenBalance.tokenKey,
             "amount": tokenBalance.balance,
-            "price": tokenBalance.getTokenPrice()
+            "price": tokenInfo.getTokenPrice()
         })
     }
     projectInfo["totalRaise"] = totalRaise

@@ -7,12 +7,11 @@ echo "Start deploying project\n"
 flow project deploy
 echo "End deploying project\n"
 echo "Start setup token vault\n"
-flow transactions send ./transactions/setup_fusd.cdc --signer deploy-account
+flow transactions send ./transactions/setup_pool_vault.cdc --args-json "$(cat args.json)" --signer deploy-account
 echo "End setup token vault\n"
 
 echo "Start setup price reader resource\n"
-flow transactions send ./transactions/install_price_reader.cdc 0x045a1763c93006ca --signer deploy-account
-flow transactions send ./transactions/install_price_reader.cdc 0x120e725050340cab --signer deploy-account
+flow transactions send ./transactions/install_price_reader.cdc --args-json "$(cat args.json)" --signer deploy-account
 echo "End setup price reader resource\n"
 
 echo "Start write token infos to RaisePool contract using admin resource\n"

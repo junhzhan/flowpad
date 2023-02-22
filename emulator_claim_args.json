@@ -1,0 +1,37 @@
+[
+  {
+    "type": "Dictionary",
+    "value": [
+      {
+        "key": {
+          "type": "String",
+          "value": "A.0ae53cb6e3f42a79.FlowToken"
+        },
+        "value": {
+          "type": "String",
+          "value": "flowTokenVault"
+        }
+      },
+      {
+        "key": {
+          "type": "String",
+          "value": "A.f8d6e0586b0a20c7.FUSD"
+        },
+        "value": {
+          "type": "String",
+          "value": "fusdVault"
+        }
+      },
+      {
+        "key": {
+          "type": "String",
+          "value": "A.e03daebed8ca0615.CVSDToken"
+        },
+        "value": {
+          "type": "String",
+          "value": "cvsdTokenVault"
+        }
+      }
+    ]
+  }
+]

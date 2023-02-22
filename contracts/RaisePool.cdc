@@ -8,7 +8,7 @@ import RaisePoolInterface from "./RaisePoolInterface.cdc"
 pub contract RaisePool {
 
 
-    access(self) var tokenInfos: {String: TokenInfo}
+    pub var tokenInfos: {String: TokenInfo}
 
     pub let AdminStorage: StoragePath
 
@@ -56,7 +56,7 @@ pub contract RaisePool {
             self.claimedAmount = 0.0
         }
 
-        pub fun setClaimedAmount(amount: UFix64) {
+        access(contract) fun setClaimedAmount(amount: UFix64) {
             self.claimedAmount = amount
         }
     }
@@ -81,6 +81,14 @@ pub contract RaisePool {
 
         pub fun getStoragePath(): StoragePath {
             return StoragePath(identifier: self.storagePathStr)!
+        }
+
+        pub fun getTokenPrice(): UFix64 {
+            if self.finalPrice != nil {
+                return self.finalPrice!
+            } else {
+                return RaisePool.readTokenPrice(oracleAccount: self.oracleAccount)
+            }
         }
 
     }
@@ -187,6 +195,7 @@ pub contract RaisePool {
 
     pub fun claim(certificateCap: Capability<&{RaisePoolInterface.Certificate}>): @{String: FungibleToken.Vault} {
         assert(getCurrentBlock().timestamp > self.endTimestamp, message: "You can't claimed now")
+        assert(certificateCap.check(), message: "invalid capbility")
         let userAccount = certificateCap.borrow()!.owner!.address
         /// first, claim project token purchased
         let tokenCollection: @{String: FungibleToken.Vault} <- {}

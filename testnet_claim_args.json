@@ -1,0 +1,35 @@
+{
+    "type": "Dictionary",
+    "value": [
+      {
+        "key": {
+          "type": "String",
+          "value": "A.7e60df042a9c0868.FlowToken"
+        },
+        "value": {
+          "type": "String",
+          "value": "flowTokenVault"
+        }
+      },
+      {
+        "key": {
+          "type": "String",
+          "value": "A.a983fecbed621163.FiatToken"
+        },
+        "value": {
+          "type": "String",
+          "value": "USDCVault"
+        }
+      },
+      {
+        "key": {
+          "type": "String",
+          "value": "A.f4a4c2b1fdfcb72f.CVSDToken"
+        },
+        "value": {
+          "type": "String",
+          "value": "cvsdTokenVault"
+        }
+      }
+    ]
+  }
