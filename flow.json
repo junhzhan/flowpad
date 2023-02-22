@@ -31,13 +31,12 @@
 			"public": "e576970b7868390eeeda3fbc3d5929741e9bbcbfd08a4652f34c27e7fde8f04019fe68c70574a609bc0745c5c4f0486cf855a34f1b6ac7c19587594f7d2e502c"
 		},
 		"testnet-deploy-account": {
-			"address": "0xd41fc0b79fd01eaa",
-			"key": "e9519cdf13582f07f23110e52dfd27e0659599f5ff4faaad560364dcfa39addd"
+			"address": "0xa5cb6cff49b4c55b",
+			"key": "46d00cb594b82338afdbc60d7b3a01477075675228280ea202ce58651e3d4e03"
 		},
 		"testnet-common-contracts-account": {
-			"address": "0x842714e27cd18f8e",
-			"key": "2572247b8d33ef59ffddb0cc197b6a9103299c42b4a9d96af5c5c744eeeddfcb",
-			"public": "d7630e1daf3b7b60f2118e446ace890363bee21f8d71b70508922133b386ff5e9bba9ee651f49017357f1e70b78742db75b1b3e5b008cb57b125a1bb2be0f730"
+			"address": "0xa7b34370a65fb516",
+			"key": "c5dd30efc687fa3953d6cc20370ab8832c7d829d2e42f72fa5e31194a594f8e3"
 		},
 		"testnet-commit-account": {
 			"address": "0x1768d28ba059980c",
