@@ -82,7 +82,9 @@
 		},
 		"FlowPriceOracle": "./contracts/oracle/FlowPriceOracle.cdc",
 		"FUSDPriceOracle": "./contracts/oracle/FUSDPriceOracle.cdc",
-		"CVSDToken": "./contracts/CVSD/CVSDToken.cdc"
+		"CVSDToken": "./contracts/CVSD/CVSDToken.cdc",
+		"RaisePoolInterface": "./contracts/RaisePoolInterface.cdc",
+		"UserCertificate": "./contracts/UserCertificate.cdc"
 	},
 	"deployments": {
 		"emulator": {
@@ -91,7 +93,10 @@
 				"StrUtility",
 				"OracleConfig",
 				"OracleInterface",
-				"RaisePool"
+				"RaisePool",
+				"RaisePoolInterface",
+				"CVSDToken",
+				"UserCertificate"
 			],
 			"flowToken-price-oracle": [
 				"FlowPriceOracle"
@@ -104,7 +109,9 @@
 			"testnet-cvsd-deploy-account": ["CVSDToken"],
 			"testnet-common-contracts-account": [
 				"ErrorCode",
-				"StrUtility"
+				"StrUtility",
+				"RaisePoolInterface",
+				"UserCertificate"
 			],
 			"testnet-deploy-account": ["RaisePool"]
 		}

@@ -19,3 +19,4 @@ echo "Start write token infos to RaisePool contract using admin resource\n"
 flow transactions send ./transactions/setup_tokenInfo.cdc --args-json "$(cat args.json)" --signer deploy-account
 echo "End write token infos to RaisePool contract using admin resource\n"
  
+flow transactions send ./transactions/setup_projectinfo.cdc --args-json "$(cat args.json)" --signer deploy-account
