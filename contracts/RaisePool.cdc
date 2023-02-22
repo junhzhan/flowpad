@@ -94,7 +94,7 @@ pub contract RaisePool {
     }
 
 
-    pub fun getUserCommitDetail(userAccount: Address): [{String: AnyStruct}] {
+    pub fun getUserCommitDetail(userAccount: Address): {String:AnyStruct} {
         assert(self.userTokenBalance.containsKey(userAccount), message: ErrorCode.encode(code: ErrorCode.Code.COMMIT_ADDRESS_NOT_EXIST))
         let userTokenBalance = self.userTokenBalance[userAccount]!
         let tokenList: [{String: AnyStruct}]= []
@@ -110,7 +110,13 @@ pub contract RaisePool {
             let price = self.readTokenPrice(oracleAccount: oracleAccount)
             tokenList.append({"tokenKey": tokenKey, "amount": balance, "price": price, "spent": tokenSpent[tokenKey]!})
         }
-        return tokenList
+
+        let userDetail: {String: AnyStruct}= {}
+        let tokenPurchased = self.getTokenPurchased(userAccount: userAccount)
+        userDetail["tokenPurchased"] = tokenPurchased
+        userDetail["tokenCommitted"] = tokenList
+        userDetail["remainToClaim"] = tokenPurchased - (self.userClaimedProjectToken[userAccount] ?? 0.0)
+        return userDetail
 
     }
 

@@ -7,12 +7,11 @@ transaction {
     prepare(signer: AuthAccount) {
 
         // It's OK if the account already has a Vault, but we don't want to replace it
-        if(signer.borrow<&CVSDToken.Vault>(from: /storage/cvsdTokenVault) != nil) {
-            return
+        if(signer.borrow<&CVSDToken.Vault>(from: /storage/cvsdTokenVault) == nil) {
+            signer.save(<-CVSDToken.createEmptyVault(), to: /storage/cvsdTokenVault)
         }
         
         // Create a new FUSD Vault and put it in storage
-        signer.save(<-CVSDToken.createEmptyVault(), to: /storage/cvsdTokenVault)
 
         // Create a public capability to the Vault that only exposes
         // the deposit function through the Receiver interface
@@ -20,6 +19,8 @@ transaction {
             /public/cvsdReceiver,
             target: /storage/cvsdTokenVault
         )
+
+        signer.link<&{FungibleToken.Balance}>(/public/cvsdBalance, target: /storage/cvsdTokenVault)
 
     }
 }
