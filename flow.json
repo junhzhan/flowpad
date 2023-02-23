@@ -31,8 +31,8 @@
 			"public": "e576970b7868390eeeda3fbc3d5929741e9bbcbfd08a4652f34c27e7fde8f04019fe68c70574a609bc0745c5c4f0486cf855a34f1b6ac7c19587594f7d2e502c"
 		},
 		"testnet-deploy-account": {
-			"address": "0xa5cb6cff49b4c55b",
-			"key": "46d00cb594b82338afdbc60d7b3a01477075675228280ea202ce58651e3d4e03"
+			"address": "0xc659ba0ac7807f79",
+			"key": "ea0f9e48d7d6631abf765fc8ab735a3178bf91733c7b7d3b08b95b179269db63"
 		},
 		"testnet-common-contracts-account": {
 			"address": "0xa7b34370a65fb516",
@@ -46,6 +46,16 @@
         		"signatureAlgorithm": "ECDSA_secp256k1",
         		"hashAlgorithm": "SHA2_256",
         		"privateKey": "a846e978b3100eb22de6d86d9b7fb7d454044e8bb83d609999516e1a48d3985c"
+			}
+		},
+		"bobo-account": {
+			"address": "0x1ee2b5f2b0651aca",
+			"key": {
+				"type": "hex",
+				"index": 0,
+        		"signatureAlgorithm": "ECDSA_secp256k1",
+        		"hashAlgorithm": "SHA2_256",
+        		"privateKey": "e84798ac6f88ec2faa8bc5a6dff7855d319d886a3f4c5fa07dee1f8d85c336f5"	
 			}
 		}
 	},

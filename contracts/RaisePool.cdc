@@ -97,7 +97,9 @@ pub contract RaisePool {
 
 
     pub fun getUserCommitDetail(userAccount: Address): {String:AnyStruct} {
-        assert(self.userTokenBalance.containsKey(userAccount), message: ErrorCode.encode(code: ErrorCode.Code.COMMIT_ADDRESS_NOT_EXIST))
+        if !self.userTokenBalance.containsKey(userAccount) {
+            return {}
+        }
         let userTokenBalance = self.userTokenBalance[userAccount]!
         let tokenList: [{String: AnyStruct}]= []
 
