@@ -28,6 +28,8 @@ pub contract RaisePool {
     pub var projectTokenKey: String
 
     pub var projectTokenStoragePath: StoragePath?
+    pub var projectTokenReceiverPath: PublicPath?
+    pub var projectTokenBalancePath: PublicPath?
 
     pub var claimedProjectToken: UFix64
 
@@ -285,11 +287,13 @@ pub contract RaisePool {
             RaisePool.projectTokenPrice = tokenPrice
         }
 
-        pub fun setTokenStoragePath(tokenStoragePath: StoragePath) {
+        pub fun setTokenPath(tokenStoragePath: StoragePath, receiverPath: PublicPath, balancePath: PublicPath) {
             let vaultRef = RaisePool.account.borrow<&FungibleToken.Vault>(from: tokenStoragePath)!
             assert(vaultRef.getType() == CompositeType(RaisePool.projectTokenKey.concat(".Vault")), message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
             assert(vaultRef.balance >= RaisePool.totalProjectToken, message: "project token amount mismatch")
             RaisePool.projectTokenStoragePath = tokenStoragePath
+            RaisePool.projectTokenReceiverPath = receiverPath
+            RaisePool.projectTokenBalancePath = balancePath
         }
 
         pub fun finalizeTokenPrice() {
@@ -344,6 +348,8 @@ pub contract RaisePool {
         self.totalProjectToken = 0.0
         self.projectTokenPrice = 0.0
         self.projectTokenStoragePath = nil
+        self.projectTokenReceiverPath = nil
+        self.projectTokenBalancePath = nil
         self.claimedProjectToken = 0.0
         self.userClaimedProjectToken = {}
         

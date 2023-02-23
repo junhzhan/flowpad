@@ -17,11 +17,11 @@
         "value": [
             {
                 "type": "String",
-                "value": "flowpad_flowToken_vault"
+                "value": "flowTokenVault"
             },
             {
                 "type": "String",
-                "value": "flowpad_usdcVault"
+                "value": "USDCVault"
             }
         ]
     },
