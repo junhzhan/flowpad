@@ -31,8 +31,8 @@
 			"public": "e576970b7868390eeeda3fbc3d5929741e9bbcbfd08a4652f34c27e7fde8f04019fe68c70574a609bc0745c5c4f0486cf855a34f1b6ac7c19587594f7d2e502c"
 		},
 		"testnet-deploy-account": {
-			"address": "0xc659ba0ac7807f79",
-			"key": "ea0f9e48d7d6631abf765fc8ab735a3178bf91733c7b7d3b08b95b179269db63"
+			"address": "0xf00491ffbbd2c363",
+			"key": "8b50072decb17dc9ae58a8d39fa4599fea7e91544b325883babe2389be20f1ea"
 		},
 		"testnet-common-contracts-account": {
 			"address": "0xa7b34370a65fb516",
