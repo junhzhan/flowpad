@@ -1,9 +1,9 @@
-import ErrorCode from "./ErrorCode.cdc"
-import FungibleToken from "./standard/FungibleToken.cdc"
-import StrUtility from "./StrUtility.cdc"
-import OracleInterface from "./oracle/OracleInterface.cdc"
-import OracleConfig from "./oracle/OracleConfig.cdc"
-import RaisePoolInterface from "./RaisePoolInterface.cdc"
+import ErrorCode from 0xa7b34370a65fb516
+import FungibleToken from 0x9a0766d93b6608b7
+import StrUtility from 0xa7b34370a65fb516
+import OracleInterface from 0x2a9b59c3e2b72ee0
+import OracleConfig from 0x2a9b59c3e2b72ee0
+import RaisePoolInterface from 0xa7b34370a65fb516
 
 pub contract RaisePool {
 
@@ -261,18 +261,6 @@ pub contract RaisePool {
 
 
     pub resource PoolAdmin {
-        /// set vault related fields for tokens to be committed
-        pub fun setTokenVaultInfo(tokenKeyList: [String], pathStrList:[String], oracleAccountList: [Address]) {
-            RaisePool.tokenInfos = {}
-            for index, tokenKey in tokenKeyList {
-                let vaultStoragePath: StoragePath = StoragePath(identifier: pathStrList[index])!
-                log(vaultStoragePath)
-                log(RaisePool.account.borrow<&FungibleToken.Vault>(from: vaultStoragePath)!.getType().identifier)
-                let tokenInfo = TokenInfo(tokenKey: tokenKey, storagePath: pathStrList[index], oracleAccount: oracleAccountList[index], finalPrice: nil)
-                assert(RaisePool.account.borrow<&FungibleToken.Vault>(from: vaultStoragePath)!.getType() == tokenInfo.getVaultType(), message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
-                RaisePool.tokenInfos.insert(key: tokenKey, tokenInfo)
-            }
-        }
 
         pub fun setStartTimestamp(startTimestamp: UFix64) {
             RaisePool.startTimestamp = startTimestamp
@@ -282,21 +270,6 @@ pub contract RaisePool {
             RaisePool.endTimestamp = endTimestamp
         }
 
-        pub fun setProjectInfo(projectName: String, tokenKey: String, tokenAmount: UFix64, tokenPrice: UFix64) {
-            RaisePool.projectName = projectName
-            RaisePool.projectTokenKey = tokenKey
-            RaisePool.totalProjectToken = tokenAmount
-            RaisePool.projectTokenPrice = tokenPrice
-        }
-
-        pub fun setTokenPath(tokenStoragePath: StoragePath, receiverPath: PublicPath, balancePath: PublicPath) {
-            let vaultRef = RaisePool.account.borrow<&FungibleToken.Vault>(from: tokenStoragePath)!
-            assert(vaultRef.getType() == CompositeType(RaisePool.projectTokenKey.concat(".Vault")), message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
-            assert(vaultRef.balance >= RaisePool.totalProjectToken, message: "project token amount mismatch")
-            RaisePool.projectTokenStoragePath = tokenStoragePath
-            RaisePool.projectTokenReceiverPath = receiverPath
-            RaisePool.projectTokenBalancePath = balancePath
-        }
 
         pub fun finalizeTokenPrice() {
             let tokenInfos = RaisePool.tokenInfos
@@ -339,20 +312,37 @@ pub contract RaisePool {
         return price
     }
 
-    init() {
-        self.AdminStorage = /storage/flowpadAdmin
+    init(tokenKeyList: [String], 
+        pathStrList:[String], 
+        oracleAccountList: [Address], 
+        projectName: String, 
+        projectTokenKey: String, 
+        tokenAmount: UFix64, 
+        tokenPrice: UFix64, 
+        tokenStoragePath: StoragePath, 
+        receiverPath: PublicPath, 
+        balancePath: PublicPath) {
         self.tokenInfos = {}
+        for index, tokenKey in tokenKeyList {
+            let vaultStoragePath: StoragePath = StoragePath(identifier: pathStrList[index])!
+            log(vaultStoragePath)
+            log(RaisePool.account.borrow<&FungibleToken.Vault>(from: vaultStoragePath)!.getType().identifier)
+            let tokenInfo = TokenInfo(tokenKey: tokenKey, storagePath: pathStrList[index], oracleAccount: oracleAccountList[index], finalPrice: nil)
+            assert(RaisePool.account.borrow<&FungibleToken.Vault>(from: vaultStoragePath)!.getType() == tokenInfo.getVaultType(), message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
+            self.tokenInfos.insert(key: tokenKey, tokenInfo)
+        }
+        self.AdminStorage = /storage/flowpadAdmin
         self.userTokenBalance = {}
         self.startTimestamp = UFix64.max
         self.endTimestamp = UFix64.max
         self.poolTokenBalance = {}
-        self.projectName = ""
-        self.projectTokenKey = ""
-        self.totalProjectToken = 0.0
-        self.projectTokenPrice = 0.0
-        self.projectTokenStoragePath = nil
-        self.projectTokenReceiverPath = nil
-        self.projectTokenBalancePath = nil
+        self.projectName = projectName
+        self.projectTokenKey = projectTokenKey
+        self.totalProjectToken = tokenAmount
+        self.projectTokenPrice = tokenPrice
+        self.projectTokenStoragePath = tokenStoragePath
+        self.projectTokenReceiverPath = receiverPath
+        self.projectTokenBalancePath = balancePath
         self.claimedProjectToken = 0.0
         self.userClaimedProjectToken = {}
         

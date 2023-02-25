@@ -7,5 +7,5 @@ pub fun main(): AnyStruct {
     //     userDetailList.append(RaisePool.getUserCommitDetail(userAccount: address))
     // }
     // return userDetailList
-    return RaisePool.tokenInfos
+    return RaisePool.totalProjectToken
 }
