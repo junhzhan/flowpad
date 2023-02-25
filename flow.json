@@ -26,13 +26,12 @@
 			"public": "cd29d47df8f64685eef7442aa928476f01f93acd82783a4598c1517286f1769f5184b7123edd8d41ac49a25f64f964525e6b64efd3f9846a46712b50399777d0"
 		},
 		"testnet-cvsd-deploy-account": {
-			"address": "0xf4a4c2b1fdfcb72f",
-			"key": "5131a1b09f5cae6b64a824c8f6e76a4eba2526c8f1bb739475b325fd769bc572",
-			"public": "e576970b7868390eeeda3fbc3d5929741e9bbcbfd08a4652f34c27e7fde8f04019fe68c70574a609bc0745c5c4f0486cf855a34f1b6ac7c19587594f7d2e502c"
+			"address": "0xe8dd94a5eb12175e",
+			"key": "590ede61cd0dcfd24d9b9570470095804be7c8d85053dae9db4cc08ca100233c"
 		},
 		"testnet-deploy-account": {
-			"address": "0xc659ba0ac7807f79",
-			"key": "ea0f9e48d7d6631abf765fc8ab735a3178bf91733c7b7d3b08b95b179269db63"
+			"address": "0x6b99acedf30b2c43",
+			"key": "f509d807442b2dbd8c47136567e1ea32f01ab012eb68ff3fc87c26c267fc9f83"
 		},
 		"testnet-common-contracts-account": {
 			"address": "0xa7b34370a65fb516",
@@ -91,7 +90,7 @@
 		},
 		"FlowPriceOracle": "./contracts/oracle/FlowPriceOracle.cdc",
 		"FUSDPriceOracle": "./contracts/oracle/FUSDPriceOracle.cdc",
-		"CVSDToken": "./contracts/CVSD/CVSDToken.cdc",
+		"CVSDTokenV2": "./contracts/CVSD/CVSDTokenV2.cdc",
 		"RaisePoolInterface": "./contracts/RaisePoolInterface.cdc",
 		"UserCertificate": "./contracts/UserCertificate.cdc"
 	},
@@ -104,7 +103,6 @@
 				"OracleInterface",
 				"RaisePool",
 				"RaisePoolInterface",
-				"CVSDToken",
 				"UserCertificate"
 			],
 			"flowToken-price-oracle": [
@@ -115,7 +113,7 @@
 			]
 		},
 		"testnet": {
-			"testnet-cvsd-deploy-account": ["CVSDToken"],
+			"testnet-cvsd-deploy-account": ["CVSDTokenV2"],
 			"testnet-common-contracts-account": [
 				"ErrorCode",
 				"StrUtility",

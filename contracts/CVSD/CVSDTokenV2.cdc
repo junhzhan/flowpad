@@ -1,6 +1,6 @@
 import FungibleToken from "../standard/FungibleToken.cdc"
 
-pub contract CVSDToken: FungibleToken {
+pub contract CVSDTokenV2: FungibleToken {
 
     // Event that is emitted when the contract is created
     pub event TokensInitialized(initialSupply: UFix64)
@@ -74,7 +74,7 @@ pub contract CVSDToken: FungibleToken {
         // was a temporary holder of the tokens. The Vault's balance has
         // been consumed and therefore can be destroyed.
         pub fun deposit(from: @FungibleToken.Vault) {
-            let vault <- from as! @CVSDToken.Vault
+            let vault <- from as! @CVSDTokenV2.Vault
             self.balance = self.balance + vault.balance
             emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
             vault.balance = 0.0
@@ -82,7 +82,7 @@ pub contract CVSDToken: FungibleToken {
         }
 
         destroy() {
-            CVSDToken.totalSupply = CVSDToken.totalSupply - self.balance
+            CVSDTokenV2.totalSupply = CVSDTokenV2.totalSupply - self.balance
         }
     }
 
@@ -93,7 +93,7 @@ pub contract CVSDToken: FungibleToken {
     // and store the returned Vault in their storage in order to allow their
     // account to be able to receive deposits of this token type.
     //
-    pub fun createEmptyVault(): @CVSDToken.Vault {
+    pub fun createEmptyVault(): @CVSDTokenV2.Vault {
         return <-create Vault(balance: 0.0)
     }
 
@@ -109,11 +109,11 @@ pub contract CVSDToken: FungibleToken {
         // Function that mints new tokens, adds them to the total supply,
         // and returns them to the calling context.
         //
-        pub fun mintTokens(amount: UFix64): @CVSDToken.Vault {
+        pub fun mintTokens(amount: UFix64): @CVSDTokenV2.Vault {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
             }
-            CVSDToken.totalSupply = CVSDToken.totalSupply + amount
+            CVSDTokenV2.totalSupply = CVSDTokenV2.totalSupply + amount
             emit TokensMinted(amount: amount)
             return <-create Vault(balance: amount)
         }
@@ -140,7 +140,7 @@ pub contract CVSDToken: FungibleToken {
             self.minterCapability = cap
         }
 
-        pub fun mintTokens(amount: UFix64): @CVSDToken.Vault {
+        pub fun mintTokens(amount: UFix64): @CVSDTokenV2.Vault {
             return <- self.minterCapability!
             .borrow()!
             .mintTokens(amount:amount)
