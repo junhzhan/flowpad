@@ -111,7 +111,7 @@ pub contract RaisePool {
             let balance = tokenBalance.balance
             let oracleAccount = tokenBalance.oracleAccount
             /// Recommended storage path for PriceReader resource
-            let price = self.readTokenPrice(oracleAccount: oracleAccount)
+            let price = self.tokenInfos[tokenKey]!.getTokenPrice()
             tokenList.append({"tokenKey": tokenKey, "amount": balance, "price": price, "spent": tokenSpent[tokenKey]!})
         }
 
@@ -330,6 +330,7 @@ pub contract RaisePool {
         }
     }
 
+    ///read token price from price oracle
     access(self) fun readTokenPrice(oracleAccount: Address): UFix64 {
         let priceReaderSuggestedPath = getAccount(oracleAccount).getCapability<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath).borrow()!.getPriceReaderStoragePath()
         let priceReaderRef  = self.account.borrow<&OracleInterface.PriceReader>(from: priceReaderSuggestedPath)
