@@ -30,13 +30,8 @@
 			"key": "590ede61cd0dcfd24d9b9570470095804be7c8d85053dae9db4cc08ca100233c"
 		},
 		"testnet-deploy-account": {
-<<<<<<< Updated upstream
-			"address": "0x6b99acedf30b2c43",
-			"key": "f509d807442b2dbd8c47136567e1ea32f01ab012eb68ff3fc87c26c267fc9f83"
-=======
 			"address": "0x0abcdc042ff50665",
 			"key": "4528ed3c33a46c4995786e262024510bbf0a0ddb0d01f9ed80adb5cad22e1dba"
->>>>>>> Stashed changes
 		},
 		"testnet-common-contracts-account": {
 			"address": "0xa7b34370a65fb516",
