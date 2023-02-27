@@ -1,9 +1,15 @@
-import ErrorCode from 0xa7b34370a65fb516
-import FungibleToken from 0x9a0766d93b6608b7
-import StrUtility from 0xa7b34370a65fb516
-import OracleInterface from 0x2a9b59c3e2b72ee0
-import OracleConfig from 0x2a9b59c3e2b72ee0
-import RaisePoolInterface from 0xa7b34370a65fb516
+// import ErrorCode from 0xa7b34370a65fb516
+// import FungibleToken from 0x9a0766d93b6608b7
+// import StrUtility from 0xa7b34370a65fb516
+// import OracleInterface from 0x2a9b59c3e2b72ee0
+// import OracleConfig from 0x2a9b59c3e2b72ee0
+// import RaisePoolInterface from 0xa7b34370a65fb516
+import ErrorCode from "./ErrorCode.cdc"
+import FungibleToken from "./standard/FungibleToken.cdc"
+import StrUtility from "./StrUtility.cdc"
+import OracleInterface from "./oracle/OracleInterface.cdc"
+import OracleConfig from "./oracle/OracleConfig.cdc"
+import RaisePoolInterface from "./RaisePoolInterface.cdc"
 
 pub contract RaisePool {
 
@@ -34,6 +40,10 @@ pub contract RaisePool {
     pub var claimedProjectToken: UFix64
 
     pub let userClaimedProjectToken: {Address: UFix64}
+
+    pub let projectOwnerAddress: Address
+
+    pub let addLiquidityRatio: UFix64
 
     pub enum Status: UInt8 {
         pub case COMING_SOON
@@ -243,6 +253,49 @@ pub contract RaisePool {
         return <- tokenCollection
     }
 
+    pub fun projectClaim(certificateCap: Capability<&{RaisePoolInterface.Certificate}>): @{String: FungibleToken.Vault} {
+        var totalCommitValue: UFix64 = self.caculateValue(tokenBalance: self.poolTokenBalance)
+        let targetRaiseValue = self.totalProjectToken * self.projectTokenPrice
+        let projectClaimRatio = totalCommitValue <= targetRaiseValue ? 1.0 : targetRaiseValue / totalCommitValue
+        let claimedTokenVaults: @{String: FungibleToken.Vault} <- {}
+        for tokenKey in self.poolTokenBalance.keys {
+            let tokenBalance = self.poolTokenBalance[tokenKey]
+            let strParts = StrUtility.splitStr(str: tokenKey, delimiter: ".")
+            let tokenAddr = StrUtility.toAddress(strParts[1])
+            let tokenName = strParts[2]
+            var tokenClaimAmount = 0.0
+            if tokenName == "FlowToken" {
+                let projectTokenKeyParts = StrUtility.splitStr(str: self.projectTokenKey, delimiter: ".")
+                let projectTokenName = projectTokenKeyParts[2]
+                let projectTokenAddr = projectTokenKeyParts[1]
+                self.createSwapPair(token0Name: tokenName, token0Addr: tokenAddr, token1Name: projectTokenName, token1Addr: projectTokenAddr)
+                let token0InAmount = tokenBalance.balance * projectClaimRatio * self.addLiquidityRatio
+                tokenClaimAmount = tokenBalance.balance * projectClaimRatio * (1 - self.addLiquidityRatio)
+            } else {
+                tokenClaimAmount = tokenBalance.balance * projectClaimRatio
+            }
+
+            let tokenInfo = self.tokenInfos[tokenKey]
+            let existValue <- claimedTokenVaults.insert(key: tokenKey, <- self.account.borrow<&FungibleToken.Vault>(from: tokenInfo.getStoragePath())!.withdraw(amount: tokenClaimAmount))
+            destroy existValue
+        }
+        return <- claimedTokenVaults
+    }
+
+    access(self) fun createSwapPair(token0Name: String, token0Addr: Address, token1Name: String, token1Addr: Address) {
+        let flowVaultRef = self.account.borrow<&FungibleToken.Vault>(from: /storage/flowTokenVault)!
+        assert(flowVaultRef.balance >= 0.002, message: "Insufficient balance to create pair, minimum balance requirement: 0.002 flow")
+        let accountCreationFeeVault <- flowVaultRef.withdraw(amount: 0.001)
+        
+        let token0Vault <- getAccount(token0Addr).contracts.borrow<&FungibleToken>(name: token0Name)!.createEmptyVault()
+        let token1Vault <- getAccount(token1Addr).contracts.borrow<&FungibleToken>(name: token1Name)!.createEmptyVault()
+        SwapFactory.createPair(token0Vault: <-token0Vault, token1Vault: <-token1Vault, accountCreationFee: <-accountCreationFeeVault)
+    )
+
+    access(self) fun addLiquidity(token0Key: String, token1Key: String, token0InDesired: UFix64, token1InDesired: UFix64, token0InMin: UFix64, token1InMin: UFix64, deadline: UFix64, token0VaultPath: StoragePath, token1VaultPath: StoragePath) {
+
+    }
+
     access(self) fun claimProjectToken(userAccount: Address): @FungibleToken.Vault? {
         let tokenPurchased = self.getTokenPurchased(userAccount: userAccount)
         if self.userClaimedProjectToken.containsKey(userAccount) {
@@ -321,7 +374,9 @@ pub contract RaisePool {
         tokenPrice: UFix64, 
         tokenStoragePath: StoragePath, 
         receiverPath: PublicPath, 
-        balancePath: PublicPath) {
+        balancePath: PublicPath,
+        projectOwnerAddress: Address,
+        addLiquidityRatio: UFix64) {
         self.tokenInfos = {}
         for index, tokenKey in tokenKeyList {
             let vaultStoragePath: StoragePath = StoragePath(identifier: pathStrList[index])!
@@ -331,6 +386,10 @@ pub contract RaisePool {
             assert(RaisePool.account.borrow<&FungibleToken.Vault>(from: vaultStoragePath)!.getType() == tokenInfo.getVaultType(), message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
             self.tokenInfos.insert(key: tokenKey, tokenInfo)
         }
+
+        let projectTokenVault = self.account.borrow<&FungibleToken.Vault>(from: tokenStoragePath)!
+        assert(projectTokenVault.getType() == CompositeType(projectTokenKey.concat("Vault")), message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
+        assert(projectTokenVault.balance >= tokenAmount * (1.0 + addLiquidityRatio), message: "Project token amount is not enough")
         self.AdminStorage = /storage/flowpadAdmin
         self.userTokenBalance = {}
         self.startTimestamp = UFix64.max
@@ -345,6 +404,8 @@ pub contract RaisePool {
         self.projectTokenBalancePath = balancePath
         self.claimedProjectToken = 0.0
         self.userClaimedProjectToken = {}
+        self.projectOwnerAddress = projectOwnerAddress
+        self.addLiquidityRatio = addLiquidityRatio
         
         self.account.save(<- create PoolAdmin(), to: self.AdminStorage)
 
