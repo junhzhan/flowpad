@@ -4,12 +4,20 @@
 // import OracleInterface from 0x2a9b59c3e2b72ee0
 // import OracleConfig from 0x2a9b59c3e2b72ee0
 // import RaisePoolInterface from 0xa7b34370a65fb516
+// import SwapFactory from 0xcbed4c301441ded2
+// import SwapError from 0xddb929038d45d4b3
+// import SwapConfig from 0xddb929038d45d4b3
+// import SwapInterfaces from 0xddb929038d45d4b3
 import ErrorCode from "./ErrorCode.cdc"
 import FungibleToken from "./standard/FungibleToken.cdc"
 import StrUtility from "./StrUtility.cdc"
 import OracleInterface from "./oracle/OracleInterface.cdc"
 import OracleConfig from "./oracle/OracleConfig.cdc"
 import RaisePoolInterface from "./RaisePoolInterface.cdc"
+import SwapFactory from "./incrementFi/SwapFactory.cdc"
+import SwapInterfaces from "./incrementFi/SwapInterfaces.cdc"
+import SwapConfig from "./incrementFi/SwapConfig.cdc"
+import SwapError from "./incrementFi/SwapError.cdc"
 
 pub contract RaisePool {
 
@@ -254,28 +262,31 @@ pub contract RaisePool {
     }
 
     pub fun projectClaim(certificateCap: Capability<&{RaisePoolInterface.Certificate}>): @{String: FungibleToken.Vault} {
+        assert(certificateCap.borrow()!.owner!.address == self.projectOwnerAddress, message: "You don't have the permission to claim raised tokens")
         var totalCommitValue: UFix64 = self.caculateValue(tokenBalance: self.poolTokenBalance)
         let targetRaiseValue = self.totalProjectToken * self.projectTokenPrice
         let projectClaimRatio = totalCommitValue <= targetRaiseValue ? 1.0 : targetRaiseValue / totalCommitValue
         let claimedTokenVaults: @{String: FungibleToken.Vault} <- {}
         for tokenKey in self.poolTokenBalance.keys {
-            let tokenBalance = self.poolTokenBalance[tokenKey]
+            let tokenInfo = self.tokenInfos[tokenKey]!
+            let tokenBalance = self.poolTokenBalance[tokenKey]!
             let strParts = StrUtility.splitStr(str: tokenKey, delimiter: ".")
-            let tokenAddr = StrUtility.toAddress(strParts[1])
+            let tokenAddr = StrUtility.toAddress(from: strParts[1])
             let tokenName = strParts[2]
             var tokenClaimAmount = 0.0
             if tokenName == "FlowToken" {
                 let projectTokenKeyParts = StrUtility.splitStr(str: self.projectTokenKey, delimiter: ".")
                 let projectTokenName = projectTokenKeyParts[2]
-                let projectTokenAddr = projectTokenKeyParts[1]
+                let projectTokenAddr = StrUtility.toAddress(from: projectTokenKeyParts[1])
                 self.createSwapPair(token0Name: tokenName, token0Addr: tokenAddr, token1Name: projectTokenName, token1Addr: projectTokenAddr)
                 let token0InAmount = tokenBalance.balance * projectClaimRatio * self.addLiquidityRatio
-                tokenClaimAmount = tokenBalance.balance * projectClaimRatio * (1 - self.addLiquidityRatio)
+                let projectTokenInAmount = token0InAmount * tokenInfo.getTokenPrice() / self.projectTokenPrice
+                self.addLiquidity(token0Key: tokenKey, token1Key: self.projectTokenKey, token0InDesired: token0InAmount, token1InDesired: projectTokenInAmount, token0InMin: 0.99 * token0InAmount, token1InMin: 0.99 * projectTokenInAmount, token0VaultPath: tokenInfo.getStoragePath(), token1VaultPath: self.projectTokenStoragePath!)
+                tokenClaimAmount = tokenBalance.balance * projectClaimRatio * (1.0 - self.addLiquidityRatio)
             } else {
                 tokenClaimAmount = tokenBalance.balance * projectClaimRatio
             }
 
-            let tokenInfo = self.tokenInfos[tokenKey]
             let existValue <- claimedTokenVaults.insert(key: tokenKey, <- self.account.borrow<&FungibleToken.Vault>(from: tokenInfo.getStoragePath())!.withdraw(amount: tokenClaimAmount))
             destroy existValue
         }
@@ -290,10 +301,79 @@ pub contract RaisePool {
         let token0Vault <- getAccount(token0Addr).contracts.borrow<&FungibleToken>(name: token0Name)!.createEmptyVault()
         let token1Vault <- getAccount(token1Addr).contracts.borrow<&FungibleToken>(name: token1Name)!.createEmptyVault()
         SwapFactory.createPair(token0Vault: <-token0Vault, token1Vault: <-token1Vault, accountCreationFee: <-accountCreationFeeVault)
-    )
+    }
 
-    access(self) fun addLiquidity(token0Key: String, token1Key: String, token0InDesired: UFix64, token1InDesired: UFix64, token0InMin: UFix64, token1InMin: UFix64, deadline: UFix64, token0VaultPath: StoragePath, token1VaultPath: StoragePath) {
-
+    access(self) fun addLiquidity(token0Key: String, token1Key: String, token0InDesired: UFix64, token1InDesired: UFix64, token0InMin: UFix64, token1InMin: UFix64, token0VaultPath: StoragePath, token1VaultPath: StoragePath) {
+        let pairAddr = SwapFactory.getPairAddress(token0Key: token0Key, token1Key: token1Key)
+            ?? panic("AddLiquidity: nonexistent pair ".concat(token0Key).concat(" <-> ").concat(token1Key).concat(", create pair first"))
+        let pairPublicRef = getAccount(pairAddr).getCapability<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath).borrow()!
+        /*
+            pairInfo = [
+                SwapPair.token0Key,
+                SwapPair.token1Key,
+                SwapPair.token0Vault.balance,
+                SwapPair.token1Vault.balance,
+                SwapPair.account.address,
+                SwapPair.totalSupply
+            ]
+        */
+        let pairInfo = pairPublicRef.getPairInfo()
+        var token0In = 0.0
+        var token1In = 0.0
+        var token0Reserve = 0.0
+        var token1Reserve = 0.0
+        if token0Key == (pairInfo[0] as! String) {
+            token0Reserve = (pairInfo[2] as! UFix64)
+            token1Reserve = (pairInfo[3] as! UFix64)
+        } else {
+            token0Reserve = (pairInfo[3] as! UFix64)
+            token1Reserve = (pairInfo[2] as! UFix64)
+        }
+        if token0Reserve == 0.0 && token1Reserve == 0.0 {
+            token0In = token0InDesired
+            token1In = token1InDesired
+        } else {
+            var amount1Optimal = SwapConfig.quote(amountA: token0InDesired, reserveA: token0Reserve, reserveB: token1Reserve)
+            if (amount1Optimal <= token1InDesired) {
+                assert(amount1Optimal >= token1InMin, message:
+                    SwapError.ErrorEncode(
+                        msg: "SLIPPAGE_OFFSET_TOO_LARGE expect min".concat(token1InMin.toString()).concat(" got ").concat(amount1Optimal.toString()),
+                        err: SwapError.ErrorCode.SLIPPAGE_OFFSET_TOO_LARGE
+                    )
+                )
+                token0In = token0InDesired
+                token1In = amount1Optimal
+            } else {
+                var amount0Optimal = SwapConfig.quote(amountA: token1InDesired, reserveA: token1Reserve, reserveB: token0Reserve)
+                assert(amount0Optimal <= token0InDesired)
+                assert(amount0Optimal >= token0InMin, message:
+                    SwapError.ErrorEncode(
+                        msg: "SLIPPAGE_OFFSET_TOO_LARGE expect min".concat(token0InMin.toString()).concat(" got ").concat(amount0Optimal.toString()),
+                        err: SwapError.ErrorCode.SLIPPAGE_OFFSET_TOO_LARGE
+                    )
+                )
+                token0In = amount0Optimal
+                token1In = token1InDesired
+            }
+        }
+        
+        let token0Vault <- self.account.borrow<&FungibleToken.Vault>(from: token0VaultPath)!.withdraw(amount: token0In)
+        let token1Vault <- self.account.borrow<&FungibleToken.Vault>(from: token1VaultPath)!.withdraw(amount: token1In)
+        let lpTokenVault <- pairPublicRef.addLiquidity(
+            tokenAVault: <- token0Vault,
+            tokenBVault: <- token1Vault
+        )
+        
+        let lpTokenCollectionStoragePath = SwapConfig.LpTokenCollectionStoragePath
+        let lpTokenCollectionPublicPath = SwapConfig.LpTokenCollectionPublicPath
+        var lpTokenCollectionRef = self.account.borrow<&SwapFactory.LpTokenCollection>(from: lpTokenCollectionStoragePath)
+        if lpTokenCollectionRef == nil {
+            destroy <- self.account.load<@AnyResource>(from: lpTokenCollectionStoragePath)
+            self.account.save(<-SwapFactory.createEmptyLpTokenCollection(), to: lpTokenCollectionStoragePath)
+            self.account.link<&{SwapInterfaces.LpTokenCollectionPublic}>(lpTokenCollectionPublicPath, target: lpTokenCollectionStoragePath)
+            lpTokenCollectionRef = self.account.borrow<&SwapFactory.LpTokenCollection>(from: lpTokenCollectionStoragePath)
+        }
+        lpTokenCollectionRef!.deposit(pairAddr: pairAddr, lpTokenVault: <- lpTokenVault)
     }
 
     access(self) fun claimProjectToken(userAccount: Address): @FungibleToken.Vault? {

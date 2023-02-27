@@ -24,7 +24,9 @@ transaction(tokenKeyList: [String], storagePathList: [String], oracleAccountList
             tokenPrice: 0.005, 
             tokenStoragePath: /storage/cvsdTokenVault, 
             receiverPath: /public/cvsdReceiver, 
-            balancePath: /public/cvsdBalance)
+            balancePath: /public/cvsdBalance,
+            projectOwnerAddress: 0x1768d28ba059980c,
+            addLiquidityRatio: 0.1)
 
     }
 }
