@@ -1,23 +1,23 @@
-// import ErrorCode from 0xa7b34370a65fb516
-// import FungibleToken from 0x9a0766d93b6608b7
-// import StrUtility from 0xa7b34370a65fb516
-// import OracleInterface from 0x2a9b59c3e2b72ee0
-// import OracleConfig from 0x2a9b59c3e2b72ee0
-// import RaisePoolInterface from 0xa7b34370a65fb516
-// import SwapFactory from 0xcbed4c301441ded2
-// import SwapError from 0xddb929038d45d4b3
-// import SwapConfig from 0xddb929038d45d4b3
-// import SwapInterfaces from 0xddb929038d45d4b3
-import ErrorCode from "./ErrorCode.cdc"
-import FungibleToken from "./standard/FungibleToken.cdc"
-import StrUtility from "./StrUtility.cdc"
-import OracleInterface from "./oracle/OracleInterface.cdc"
-import OracleConfig from "./oracle/OracleConfig.cdc"
-import RaisePoolInterface from "./RaisePoolInterface.cdc"
-import SwapFactory from "./incrementFi/SwapFactory.cdc"
-import SwapInterfaces from "./incrementFi/SwapInterfaces.cdc"
-import SwapConfig from "./incrementFi/SwapConfig.cdc"
-import SwapError from "./incrementFi/SwapError.cdc"
+import ErrorCode from 0xa7b34370a65fb516
+import FungibleToken from 0x9a0766d93b6608b7
+import StrUtility from 0xa7b34370a65fb516
+import OracleInterface from 0x2a9b59c3e2b72ee0
+import OracleConfig from 0x2a9b59c3e2b72ee0
+import RaisePoolInterface from 0xa7b34370a65fb516
+import SwapFactory from 0xcbed4c301441ded2
+import SwapError from 0xddb929038d45d4b3
+import SwapConfig from 0xddb929038d45d4b3
+import SwapInterfaces from 0xddb929038d45d4b3
+// import ErrorCode from "./ErrorCode.cdc"
+// import FungibleToken from "./standard/FungibleToken.cdc"
+// import StrUtility from "./StrUtility.cdc"
+// import OracleInterface from "./oracle/OracleInterface.cdc"
+// import OracleConfig from "./oracle/OracleConfig.cdc"
+// import RaisePoolInterface from "./RaisePoolInterface.cdc"
+// import SwapFactory from "./incrementFi/SwapFactory.cdc"
+// import SwapInterfaces from "./incrementFi/SwapInterfaces.cdc"
+// import SwapConfig from "./incrementFi/SwapConfig.cdc"
+// import SwapError from "./incrementFi/SwapError.cdc"
 
 pub contract RaisePool {
 
@@ -468,7 +468,7 @@ pub contract RaisePool {
         }
 
         let projectTokenVault = self.account.borrow<&FungibleToken.Vault>(from: tokenStoragePath)!
-        assert(projectTokenVault.getType() == CompositeType(projectTokenKey.concat("Vault")), message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
+        assert(projectTokenVault.getType() == CompositeType(projectTokenKey.concat(".Vault"))!, message: ErrorCode.encode(code: ErrorCode.Code.VAULT_TYPE_MISMATCH))
         assert(projectTokenVault.balance >= tokenAmount * (1.0 + addLiquidityRatio), message: "Project token amount is not enough")
         self.AdminStorage = /storage/flowpadAdmin
         self.userTokenBalance = {}
