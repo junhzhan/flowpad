@@ -37,9 +37,9 @@ transaction(tokenKeyList: [String], storagePathList: [String], oracleAccountList
             projectTokenKey: "A.".concat(cvsdTokenAddress).concat(".CVSDTokenV2"), 
             tokenAmount: 10_0000.0, 
             tokenPrice: 0.005, 
-            tokenStoragePath: /storage/cvsdTokenVault, 
-            receiverPath: /public/cvsdReceiver, 
-            balancePath: /public/cvsdBalance,
+            tokenStoragePath: /storage/cvsdTokenVaultV2, 
+            receiverPath: /public/cvsdReceiverV2, 
+            balancePath: /public/cvsdBalanceV2,
             projectOwnerAddress: Address(0x1768d28ba059980c),
             addLiquidityRatio: 0.1)
 

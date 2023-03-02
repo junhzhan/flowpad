@@ -30,8 +30,8 @@
 			"key": "590ede61cd0dcfd24d9b9570470095804be7c8d85053dae9db4cc08ca100233c"
 		},
 		"testnet-deploy-account": {
-			"address": "0x311963cf24b09137",
-			"key": "757212a82e6e8d6857f0ec37d3ae9904c8ab05cf5063efb6b976f2cc0e8251c6"
+			"address": "0xde93af01ef2124e5",
+			"key": "f0016c9202e1da28257188b8f8ce1b4feeaf4b90ffc608b6070417251a705f64"
 		},
 		"testnet-common-contracts-account": {
 			"address": "0xa7b34370a65fb516",
